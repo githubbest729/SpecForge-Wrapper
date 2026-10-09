@@ -9,13 +9,18 @@ var B={
 'Client / Prospect Research Brief':'Act as a research lead preparing a founder for a client or prospect meeting. From the input below, produce a Research Brief: company overview, market position, leadership, recent developments to verify, likely hiring needs, conversation openers, and risks.',
 'Role Spec / Job Spec Generator':'Act as a talent strategist. From the Job Description and client needs below, write a Role Spec: purpose of the role, key outcomes at 6 and 12 months, responsibilities, must-have and nice-to-have criteria, reporting line, and screening questions.',
 'LinkedIn Post Angle':'Act as a ghostwriter for a founder. Using the material below, propose five LinkedIn post angles, each with a hook line, three supporting points, and a closing question. Then draft the strongest angle in under 180 words.',
-'Weekly Marketing Summary':'Act as a marketing lead writing for a founder. From the notes below, write a Weekly Marketing Summary: headline results, what worked, what did not, key numbers (only those provided), next week priorities, and decisions needed.'};
+'Weekly Marketing Summary':'Act as a marketing lead writing for a founder. From the notes below, write a Weekly Marketing Summary: headline results, what worked, what did not, key numbers (only those provided), next week priorities, and decisions needed.',
+'LinkedIn Content Calendar':'Act as a ghostwriter planning a week of LinkedIn content for a founder. From the brief or Job Description below, create five distinct post angles, one per weekday: Story, Contrarian, Insight, Listicle, Teaser. For each give a hook line, the core point, a 120 to 180 word draft, and a closing question. Never reveal confidential client or candidate details.',
+'Engagement & Reactivation Helper':'Act as a chief of staff supporting a founder. From the material below, write five thoughtful comments (two to three sentences each) to post on industry peers LinkedIn posts, and three short reactivation DMs (under 60 words each) for stale candidate or client threads. Every message must add value, reference something specific, and avoid generic check-in phrasing.',
+'Quick BD Research Pack':'Act as a business development researcher. From the Job Description below, produce a one-page Quick BD Research Pack: a company overview (what they do, stage, market), five approach angles tied to their hiring need, and three conversation openers. Mark anything unverified.',
+'Target List Builder':'Act as a sourcing specialist. From the Job Description below, extract the core requirements (must-haves, nice-to-haves, seniority signals), then build a boolean search string for LinkedIn Recruiter with grouped titles, skills and exclusions, plus a list of 15 competitor or adjacent companies to source from, each with a one-line reason. Flag companies to verify.',
+'SOP & Process Documenter':'Act as an operations lead. Turn the raw notes below into a Standard Operating Procedure: purpose, trigger, owner, tools needed, a numbered step-by-step checklist, common mistakes, and a done-when criterion, so the workflow never has to be explained again. List any missing information as questions to confirm.'};
 var D={};Object.keys(B).forEach(function(k){D[k]=B[k]+VR});
 function ld(k,f){try{var v=JSON.parse(localStorage.getItem(k));return v||f}catch(e){return f}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 var tpl=ld(T,null),S=ld(K,{}),ss=ld(SS,{});
-if(!tpl)tpl=D;else if(!ld('sf_v2',0)){tpl=Object.assign({},D,tpl);sv(T,tpl)}
-sv('sf_v2',1);
+if(!tpl)tpl=D;else if(!ld('sf_v3',0)){tpl=Object.assign({},D,tpl);sv(T,tpl)}
+sv('sf_v3',1);
 function note(t){$('msg').textContent=t;setTimeout(function(){$('msg').textContent=''},2500)}
 function today(){return new Date().toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})}
 function short(ts){return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'})}
@@ -45,17 +50,19 @@ function pv(){var c=$('conf').checked;$('ctext').disabled=!c;var h=md($('ai').va
 if(!h){$('pv').innerHTML='<p class="ph">Your formatted brief appears here.</p>';return}
 var t=esc($('ctext').value.trim()||CT),d=today();
 $('pv').innerHTML=(c?'<div class="ch">'+t+' \u2013 '+d+'</div>':'')+h+(c?'<div class="cf">'+t+'</div>':'')}
-function gen(){save();$('out').value=(tpl[$('fmt').value]||'')+'\n\n=== CANDIDATE CV / LINKEDIN PROFILE ===\n'+($('cv').value.trim()||'[not provided]')+'\n\n=== JOB DESCRIPTION / CLIENT NEEDS ===\n'+($('jd').value.trim()||'[not provided]')+'\n\n=== END OF INPUT ===';note('Master prompt ready.')}
+function gen(){save();var f=$('fmt').value,v=$('voice').value.trim(),mk=/linkedin|marketing|engagement|reactivation/i.test(f);$('out').value=(tpl[f]||'')+(mk&&v?'\n\nCRITICAL VOICE RULE: Match the exact tone, sentence length, and formatting of these sample posts:\n'+v:'')+'\n\n=== CANDIDATE CV / LINKEDIN PROFILE ===\n'+($('cv').value.trim()||'[not provided]')+'\n\n=== JOB DESCRIPTION / CLIENT NEEDS ===\n'+($('jd').value.trim()||'[not provided]')+'\n\n=== END OF INPUT ===';note(mk&&!v?'Prompt ready. Tip: add writing samples under Voice Lock.':'Master prompt ready.')}
 function copy(){var t=$('out').value;
 function fb(){$('out').select();try{document.execCommand('copy');note('Copied.')}catch(e){note('Press Ctrl+C to copy.')}}
 if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){note('Copied.')},fb);else fb()}
 function handoff(url){if(!$('out').value)gen();copy();if(url)window.open(url,'_blank','noopener')}
+function day(){return new Date().toISOString().slice(0,10)}
+function dl(t,ty,n){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:ty}));a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},1000)}
 $('gen').onclick=gen;
 $('cp').onclick=function(){if(!$('out').value)return note('Generate a prompt first.');copy()};
 $('cpc').onclick=function(){handoff('https://claude.ai/new')};
 $('cpg').onclick=function(){handoff('https://chatgpt.com')};
 $('txt').onclick=function(){var t=$('out').value;if(!t)return note('Generate a prompt first.');
-var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='master-prompt-'+new Date().toISOString().slice(0,10)+'.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);note('Downloaded.')};
+dl(t,'text/plain','master-prompt-'+day()+'.txt');note('Downloaded.')};
 $('clr').onclick=function(){if(!confirm('Clear the CV, job description, prompt and pasted output?'))return;
 ['cv','jd','out','ai'].forEach(function(i){$(i).value=''});$('conf').checked=false;ct();pv();save();note('Cleared.')};
 document.addEventListener('keydown',function(e){var t=e.target;
@@ -68,6 +75,12 @@ var has=!!tpl[s.fmt];if(has)$('fmt').value=s.fmt;
 s.at=Date.now();sv(SS,ss);sessList(n);$('sname').value=n;ct();gen();
 note(has?'Session loaded.':'Session loaded. Its template no longer exists, so "'+$('fmt').value+'" is selected.');
 $('out').scrollIntoView({behavior:'smooth',block:'center'})};
+function auto(){return $('jd').value.replace(/\s+/g,' ').trim().slice(0,30)}
+$('sname').onfocus=function(){if(!this.value.trim())this.value=auto()};
+$('sdup').onclick=function(){var n=$('sname').value.trim()||auto();$('sname').value=(n||'Untitled')+' (copy)';$('out').value='';note('Duplicated as an unsaved draft. Click Save Session to keep it.')};
+$('sjson').onclick=function(){var n=$('sname').value.trim()||auto()||'session',sl=n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'session';
+dl(JSON.stringify({name:n,format:$('fmt').value,cv:$('cv').value,jd:$('jd').value,exported:new Date().toISOString()},null,2),'application/json',sl+'-'+day()+'.json');note('Session exported.')};
+$('voice').oninput=function(){sv('sf_voice',this.value)};
 $('sdel').onclick=function(){var n=$('ssel').value;if(!ss[n])return note('No saved session.');delete ss[n];sv(SS,ss);sessList();note('Session deleted.')};
 $('tsel').onchange=showT;
 $('tsave').onclick=function(){var n=$('tname').value.trim();if(!n||!$('tbody').value.trim())return note('Add a name and instructions.');tpl[n]=$('tbody').value;sv(T,tpl);S.fmt=n;refresh(n);save();note('Template saved.')};
@@ -87,5 +100,5 @@ hd.addEventListener('click',function(e){if(e.target===hd)hclose()});
 $('th').onclick=function(){var c=H.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');H.dataset.theme=c==='dark'?'light':'dark';sv('sf_theme',H.dataset.theme)};
 var th=ld('sf_theme',null);if(th)H.dataset.theme=th;
 ['cv','jd','fmt','ai'].forEach(function(i){$(i).oninput=$(i).onchange=function(){save();if(i==='ai')pv();if(i==='cv'||i==='jd')ct()}});
-refresh();sessList();['cv','jd','ai'].forEach(function(i){$(i).value=S[i]||''});$('conf').checked=!!S.conf;$('ctext').value=S.ctext||CT;ct();pv();
+$('voice').value=ld('sf_voice','');refresh();sessList();['cv','jd','ai'].forEach(function(i){$(i).value=S[i]||''});$('conf').checked=!!S.conf;$('ctext').value=S.ctext||CT;ct();pv();
 })();
