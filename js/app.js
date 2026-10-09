@@ -1,16 +1,30 @@
 (function(){
-var $=function(i){return document.getElementById(i)},K='sf_session',T='sf_tpl',H=document.documentElement;
-var D={'Executive Brief':'Act as an elite executive recruiter. Using the CV and Job Description below, write a formal Executive Brief with these sections: Candidate Snapshot, Career Narrative, Fit Against the Mandate, Risks and Mitigations, Recommendation. Use Markdown headings (#, ##) and bullet points. Never invent facts; flag gaps explicitly.',
-'Market Intelligence Pack':'Act as a senior executive search researcher. From the CV and Job Description below, produce a Market Intelligence Pack: target companies, comparable titles, compensation signals, talent pools, and approach angles. Use Markdown headings and bullets. State assumptions and mark anything unverified.',
-'Company Cheat Sheet':'Act as a chief of staff briefing a founder. From the Job Description and CV below, produce a one-page Company Cheat Sheet: business model, stage, leadership, news to verify, likely interview themes, and ten sharp questions. Use Markdown headings and bullets.'};
-function ld(k,f){try{return JSON.parse(localStorage.getItem(k))||f}catch(e){return f}}
+var $=function(i){return document.getElementById(i)},K='sf_session',T='sf_tpl',SS='sf_sessions',H=document.documentElement;
+var VR='\n\nVoice & format rules: Write in plain, direct executive English. Lead with the conclusion. Keep paragraphs to three sentences or fewer and prefer bullets. No hype, filler or emojis. Never invent facts; mark assumptions and unverified items clearly. Use Markdown headings (#, ##).';
+var B={
+'Executive Brief':'Act as an elite executive recruiter. Using the CV and Job Description below, write a formal Executive Brief with these sections: Candidate Snapshot, Career Narrative, Fit Against the Mandate, Risks and Mitigations, Recommendation.',
+'Market Intelligence Pack':'Act as a senior executive search researcher. From the CV and Job Description below, produce a Market Intelligence Pack: target companies, comparable titles, compensation signals, talent pools, and approach angles.',
+'Company Cheat Sheet':'Act as a chief of staff briefing a founder. From the Job Description and CV below, produce a one-page Company Cheat Sheet: business model, stage, leadership, news to verify, likely interview themes, and ten sharp questions.',
+'Candidate Outreach Message':'Act as an executive search consultant writing a first-touch message to a passive candidate. Using the CV and Job Description below, write a LinkedIn message under 120 words and a follow-up email under 150 words. Personalise with one specific achievement from the CV, describe the opportunity without confidential details, and end with a low-pressure call to action.',
+'Client / Prospect Research Brief':'Act as a research lead preparing a founder for a client or prospect meeting. From the input below, produce a Research Brief: company overview, market position, leadership, recent developments to verify, likely hiring needs, conversation openers, and risks.',
+'Role Spec / Job Spec Generator':'Act as a talent strategist. From the Job Description and client needs below, write a Role Spec: purpose of the role, key outcomes at 6 and 12 months, responsibilities, must-have and nice-to-have criteria, reporting line, and screening questions.',
+'LinkedIn Post Angle':'Act as a ghostwriter for a founder. Using the material below, propose five LinkedIn post angles, each with a hook line, three supporting points, and a closing question. Then draft the strongest angle in under 180 words.',
+'Weekly Marketing Summary':'Act as a marketing lead writing for a founder. From the notes below, write a Weekly Marketing Summary: headline results, what worked, what did not, key numbers (only those provided), next week priorities, and decisions needed.'};
+var D={};Object.keys(B).forEach(function(k){D[k]=B[k]+VR});
+function ld(k,f){try{var v=JSON.parse(localStorage.getItem(k));return v||f}catch(e){return f}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-var tpl=ld(T,D),S=ld(K,{});
+var tpl=ld(T,null),S=ld(K,{}),ss=ld(SS,{});
+if(!tpl)tpl=D;else if(!ld('sf_v2',0)){tpl=Object.assign({},D,tpl);sv(T,tpl)}
+sv('sf_v2',1);
 function note(t){$('msg').textContent=t;setTimeout(function(){$('msg').textContent=''},2500)}
-function opts(s,keep){s.innerHTML='';Object.keys(tpl).forEach(function(n){var o=document.createElement('option');o.value=o.textContent=n;s.appendChild(o)});if(keep&&tpl[keep])s.value=keep}
+function today(){return new Date().toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})}
+function opts(s,list,keep){s.innerHTML='';list.forEach(function(n){var o=document.createElement('option');o.value=o.textContent=n;s.appendChild(o)});if(keep&&list.indexOf(keep)>-1)s.value=keep}
 function showT(){var n=$('tsel').value;$('tname').value=n;$('tbody').value=tpl[n]||''}
-function refresh(n){opts($('fmt'),n||S.fmt);opts($('tsel'),n||$('tsel').value);showT()}
-function save(){S={cv:$('cv').value,jd:$('jd').value,fmt:$('fmt').value,ai:$('ai').value};sv(K,S)}
+function refresh(n){var l=Object.keys(tpl);opts($('fmt'),l,n||S.fmt);opts($('tsel'),l,n||$('tsel').value);showT()}
+function sessList(keep){opts($('ssel'),Object.keys(ss).sort(function(a,b){return ss[b].at-ss[a].at}),keep)}
+function cnt(i,o){var t=$(i).value.trim(),w=t?t.split(/\s+/).length:0;$(o).textContent=w+(w===1?' word, ':' words, ')+$(i).value.length+' characters'}
+function ct(){cnt('cv','cvc');cnt('jd','jdc')}
+function save(){S={cv:$('cv').value,jd:$('jd').value,fmt:$('fmt').value,ai:$('ai').value,conf:$('conf').checked};sv(K,S)}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')}
 function md(t){var o=[],ul=0;function cl(){if(ul){o.push('</ul>');ul=0}}
@@ -18,19 +32,38 @@ t.split(/\r?\n/).forEach(function(l){var m;
 if(m=l.match(/^(#{1,3})\s+(.*)/)){cl();o.push('<h'+m[1].length+'>'+inl(m[2])+'</h'+m[1].length+'>')}
 else if(m=l.match(/^\s*[-*\u2022]\s+(.*)/)){if(!ul){o.push('<ul>');ul=1}o.push('<li>'+inl(m[1])+'</li>')}
 else if(/^\s*$/.test(l)){cl()}else{cl();o.push('<p>'+inl(l)+'</p>')}});cl();return o.join('')}
-function pv(){$('pv').innerHTML=md($('ai').value)||'<p class="ph">Your formatted brief appears here.</p>'}
-$('gen').onclick=function(){save();$('out').value=(tpl[$('fmt').value]||'')+'\n\n=== CANDIDATE CV / LINKEDIN PROFILE ===\n'+($('cv').value.trim()||'[not provided]')+'\n\n=== JOB DESCRIPTION / CLIENT NEEDS ===\n'+($('jd').value.trim()||'[not provided]')+'\n\n=== END OF INPUT ===';note('Master prompt ready.')};
-$('cp').onclick=function(){var t=$('out').value;if(!t)return note('Generate a prompt first.');
+function pv(){var h=md($('ai').value);if(!h){$('pv').innerHTML='<p class="ph">Your formatted brief appears here.</p>';return}
+var c=$('conf').checked,d=today();
+$('pv').innerHTML=(c?'<div class="ch">Confidential Research Brief \u2013 '+d+'</div>':'')+h+(c?'<div class="cf">Confidential \u2013 '+d+'</div>':'')}
+function gen(){save();$('out').value=(tpl[$('fmt').value]||'')+'\n\n=== CANDIDATE CV / LINKEDIN PROFILE ===\n'+($('cv').value.trim()||'[not provided]')+'\n\n=== JOB DESCRIPTION / CLIENT NEEDS ===\n'+($('jd').value.trim()||'[not provided]')+'\n\n=== END OF INPUT ===';note('Master prompt ready.')}
+function copy(){var t=$('out').value;
 function fb(){$('out').select();try{document.execCommand('copy');note('Copied.')}catch(e){note('Press Ctrl+C to copy.')}}
-if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){note('Copied.')},fb);else fb()};
+if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){note('Copied.')},fb);else fb()}
+function handoff(url){if(!$('out').value)gen();copy();if(url)window.open(url,'_blank','noopener')}
+$('gen').onclick=gen;
+$('cp').onclick=function(){if(!$('out').value)return note('Generate a prompt first.');copy()};
+$('cpc').onclick=function(){handoff('https://claude.ai/new')};
+$('cpg').onclick=function(){handoff('https://chatgpt.com')};
+$('txt').onclick=function(){var t=$('out').value;if(!t)return note('Generate a prompt first.');
+var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='master-prompt-'+new Date().toISOString().slice(0,10)+'.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);note('Downloaded.')};
+$('clr').onclick=function(){if(!confirm('Clear the CV, job description, prompt and pasted output?'))return;
+['cv','jd','out','ai'].forEach(function(i){$(i).value=''});$('conf').checked=false;ct();pv();save();note('Cleared.')};
+document.addEventListener('keydown',function(e){var t=e.target;
+if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&t.tagName==='TEXTAREA'&&t.closest('#t1')&&!t.readOnly){e.preventDefault();gen()}});
+$('ssave').onclick=function(){var n=$('sname').value.trim();if(!n)return note('Name the session first.');
+ss[n]={cv:$('cv').value,jd:$('jd').value,fmt:$('fmt').value,at:Date.now()};sv(SS,ss);sessList(n);note('Session saved.')};
+$('sload').onclick=function(){var n=$('ssel').value,s=ss[n];if(!s)return note('No saved session.');
+$('cv').value=s.cv;$('jd').value=s.jd;if(tpl[s.fmt])$('fmt').value=s.fmt;$('out').value='';$('sname').value=n;ct();save();note('Session loaded.')};
+$('sdel').onclick=function(){var n=$('ssel').value;if(!ss[n])return note('No saved session.');delete ss[n];sv(SS,ss);sessList();note('Session deleted.')};
 $('tsel').onchange=showT;
 $('tsave').onclick=function(){var n=$('tname').value.trim();if(!n||!$('tbody').value.trim())return note('Add a name and instructions.');tpl[n]=$('tbody').value;sv(T,tpl);S.fmt=n;refresh(n);save();note('Template saved.')};
 $('tnew').onclick=function(){$('tname').value='';$('tbody').value='';$('tname').focus()};
 $('tdel').onclick=function(){var n=$('tsel').value;if(Object.keys(tpl).length<2)return note('Keep at least one template.');delete tpl[n];sv(T,tpl);S.fmt='';refresh();note('Template deleted.')};
 document.querySelectorAll('nav button').forEach(function(b){b.onclick=function(){document.querySelectorAll('nav button,.tab').forEach(function(e){e.classList.remove('on')});b.classList.add('on');$(b.dataset.t).classList.add('on')}});
 $('pdf').onclick=function(){pv();window.print()};
+$('conf').onchange=function(){save();pv()};
 $('th').onclick=function(){var c=H.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');H.dataset.theme=c==='dark'?'light':'dark';sv('sf_theme',H.dataset.theme)};
 var th=ld('sf_theme',null);if(th)H.dataset.theme=th;
-['cv','jd','fmt','ai'].forEach(function(i){$(i).oninput=$(i).onchange=function(){save();if(i==='ai')pv()}});
-refresh();['cv','jd','ai'].forEach(function(i){$(i).value=S[i]||''});pv();
+['cv','jd','fmt','ai'].forEach(function(i){$(i).oninput=$(i).onchange=function(){save();if(i==='ai')pv();if(i==='cv'||i==='jd')ct()}});
+refresh();sessList();['cv','jd','ai'].forEach(function(i){$(i).value=S[i]||''});$('conf').checked=!!S.conf;ct();pv();
 })();
