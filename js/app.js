@@ -28,11 +28,19 @@ function ct(){cnt('cv','cvc');cnt('jd','jdc')}
 function save(){S={cv:$('cv').value,jd:$('jd').value,fmt:$('fmt').value,ai:$('ai').value,conf:$('conf').checked,ctext:$('ctext').value};sv(K,S)}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')}
-function md(t){var o=[],ul=0;function cl(){if(ul){o.push('</ul>');ul=0}}
-t.split(/\r?\n/).forEach(function(l){var m;
+var MR=/^\s*(?:[-*\u2022]\s+)?(?:\*\*)?([A-Za-z][A-Za-z \/&]{1,28}?)(?::\s*\*\*|\*\*:|:)\s*(.*)$/,KN=/^(target role|candidate|recommendation|client|prepared (for|by)|date|location|current role|company|role)$/i;
+function meta(L){var i=0,pre=[],m=[],x;while(i<L.length&&/^\s*$/.test(L[i]))i++;
+if(i<L.length&&/^#{1,3}\s/.test(L[i])){pre.push(L[i]);i++;while(i<L.length&&/^\s*$/.test(L[i]))i++}
+while(i<L.length&&(x=L[i].match(MR))){m.push(x);i++}
+if(m.length<2||!m.some(function(y){return KN.test(y[1].trim())}))return null;
+return{pre:pre,items:m,rest:L.slice(i)}}
+function md(t){var o=[],ul=0,L=t.split(/\r?\n/),mt=meta(L);function cl(){if(ul){o.push('</ul>');ul=0}}
+function ln(l){var m;
 if(m=l.match(/^(#{1,3})\s+(.*)/)){cl();o.push('<h'+m[1].length+'>'+inl(m[2])+'</h'+m[1].length+'>')}
 else if(m=l.match(/^\s*[-*\u2022]\s+(.*)/)){if(!ul){o.push('<ul>');ul=1}o.push('<li>'+inl(m[1])+'</li>')}
-else if(/^\s*$/.test(l)){cl()}else{cl();o.push('<p>'+inl(l)+'</p>')}});cl();return o.join('')}
+else if(/^\s*$/.test(l)){cl()}else{cl();o.push('<p>'+inl(l)+'</p>')}}
+if(mt){mt.pre.forEach(ln);o.push('<div class="meta-header">'+mt.items.map(function(x){var v=x[2].trim();return '<div'+(v.length>70?' class="wide"':'')+'><strong>'+esc(x[1].trim())+':</strong> '+inl(v)+'</div>'}).join('')+'</div>');L=mt.rest}
+L.forEach(ln);cl();return o.join('')}
 function pv(){var c=$('conf').checked;$('ctext').disabled=!c;var h=md($('ai').value);
 if(!h){$('pv').innerHTML='<p class="ph">Your formatted brief appears here.</p>';return}
 var t=esc($('ctext').value.trim()||CT),d=today();
