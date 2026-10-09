@@ -26,4 +26,8 @@ details{margin-top:24px;border-top:1px solid var(--ln);padding-top:12px}.tp text
 .a4 ul{padding-left:18pt}.a4 p{margin:0 0 7pt}.ph{color:#888}
 .a4 .ch{border-bottom:1px solid #b8893a;color:#7a5c1a;font-size:9pt;margin-bottom:12pt;padding-bottom:4pt}
 .a4 .cf{border-top:1px solid #ccc;color:#777;font-size:8pt;margin-top:18pt;padding-top:4pt}
+.hb{display:flex;gap:8px}
+dialog{max-width:520px;width:calc(100% - 32px);padding:24px;border:1px solid var(--ln);border-radius:10px;background:var(--pn);color:var(--fg)}
+dialog::backdrop{background:rgba(10,10,12,.6)}
+dialog h2{margin:0 0 12px;font:1.4rem Georgia,serif}dialog ol{padding-left:20px;margin:0 0 12px}dialog li{margin:0 0 10px}
 .doc{max-width:640px;margin:0 auto;padding:40px 20px;font-family:Georgia,serif}
