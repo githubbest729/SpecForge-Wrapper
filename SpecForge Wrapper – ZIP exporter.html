@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SpecForge Wrapper – ZIP exporter</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#eeece5;--fg:#1d1d21;--mut:#66645d;--ln:#cfcbbd;--au:#8a6a1f;--bt:#1d1d21;--bf:#f1d98f}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#16161a;--fg:#ece8dc;--mut:#9a978c;--ln:#35353c;--au:#d4af5a;--bt:#d4af5a;--bf:#1a1a1e}}
+:root[data-theme=dark]{--bg:#16161a;--fg:#ece8dc;--mut:#9a978c;--ln:#35353c;--au:#d4af5a;--bt:#d4af5a;--bf:#1a1a1e}
+html,body{height:100%}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 Georgia,'Times New Roman',serif}
+main{max-width:640px;margin:0 auto;padding:40px 20px}
+.top{display:flex;gap:20px;align-items:center}.top img{width:88px;height:88px;border-radius:18px}
+h1{font-size:2.3rem;line-height:1.1;margin:0}p{margin:.6rem 0;color:var(--mut)}
+button{font:600 1rem Georgia,serif;background:var(--bt);color:var(--bf);border:0;border-radius:6px;padding:14px 22px;cursor:pointer;margin:18px 0 6px}
+button:disabled{opacity:.5;cursor:wait}button:focus-visible,summary:focus-visible{outline:3px solid var(--au);outline-offset:2px}
+#st{min-height:1.5em;color:var(--au)}details{border-top:1px solid var(--ln);margin-top:24px;padding-top:10px}
+pre{overflow-x:auto;font-size:.85rem;line-height:1.5;margin:8px 0}
+</style></head><body><main>
+<div class="top"><img id="ic" alt="SpecForge icon" width="88" height="88"><div><h1>SpecForge Wrapper</h1><p>Local prompt engine &amp; executive brief generator</p></div></div>
+<p>An offline-first PWA with no dependencies. This page bundles the full repository (<span id="n">…</span> files, with generated icons) into one archive for GitHub.</p>
+<button id="dl" disabled>Download specforge-wrapper.zip</button>
+<div id="st" role="status">Building files…</div>
+<details><summary>Files in the archive</summary><pre id="ls"></pre></details>
+<details><summary>Push to GitHub</summary><p>Unzip, create a repository, push the folder, then enable Settings → Pages → Source: GitHub Actions. The included workflow deploys on every push to main.</p></details>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+var r=String.raw,F={};
+function fix(s){return s.replace(/<\\\//g,'</')}
+function pg(t,b){return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+t+' – SpecForge Wrapper</title><link rel="icon" href="favicon.ico"><link rel="stylesheet" href="css/style.css"></head><body><main class="doc"><h1>'+t+'</h1>'+b+'<p><a href="./">Back to SpecForge Wrapper</a></p></main></body></html>\n'}
+F['index.html']=r`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SpecForge Wrapper</title><meta name="description" content="Local prompt engine and executive brief generator"><meta name="theme-color" content="#1d1d21"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="favicon.ico"><link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png"><link rel="apple-touch-icon" href="icons/icon-180x180.png"><meta name="msapplication-config" content="browserconfig.xml"><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/print.css" media="print"></head><body>
+<header><div><h1>SpecForge Wrapper</h1><small>Local prompt engine &amp; executive brief generator</small></div><button id="th" type="button">Theme</button></header>
+<nav><button class="on" data-t="t1" type="button">Prompt staging</button><button data-t="t2" type="button">Brief &amp; PDF</button></nav>
+<main><section id="t1" class="tab on">
+<div class="g"><label>Paste Candidate CV / LinkedIn Profile<textarea id="cv"></textarea></label><label>Paste Job Description or Client Needs<textarea id="jd"></textarea></label></div>
+<label>Select Output Format<select id="fmt"></select></label>
+<button id="gen" class="pri" type="button">Generate Master Prompt</button>
+<label>Master prompt<textarea id="out" readonly></textarea></label>
+<button id="cp" class="pri" type="button">Copy Master Prompt</button> <span id="msg" role="status"></span>
+<details><summary>Manage templates</summary><div class="tp"><label>Template<select id="tsel"></select></label><label>Name<input id="tname"></label><label>Base instructions<textarea id="tbody"></textarea></label><div><button id="tsave" type="button">Save template</button> <button id="tnew" type="button">New template</button> <button id="tdel" type="button">Delete template</button></div></div></details>
+</section>
+<section id="t2" class="tab"><div class="ed"><label>Paste AI Output Here<textarea id="ai"></textarea></label><button id="pdf" class="pri" type="button">Generate Client PDF</button><p class="hint">In the print dialog choose Save as PDF, paper A4, margins None, headers and footers off.</p></div><article id="pv" class="a4"></article></section>
+</main><script src="js/app.js"><\/script><script src="js/sw-register.js"><\/script></body></html>
+`;
+F['js/app.js']=r`(function(){
+var $=function(i){return document.getElementById(i)},K='sf_session',T='sf_tpl',H=document.documentElement;
+var D={'Executive Brief':'Act as an elite executive recruiter. Using the CV and Job Description below, write a formal Executive Brief with these sections: Candidate Snapshot, Career Narrative, Fit Against the Mandate, Risks and Mitigations, Recommendation. Use Markdown headings (#, ##) and bullet points. Never invent facts; flag gaps explicitly.',
+'Market Intelligence Pack':'Act as a senior executive search researcher. From the CV and Job Description below, produce a Market Intelligence Pack: target companies, comparable titles, compensation signals, talent pools, and approach angles. Use Markdown headings and bullets. State assumptions and mark anything unverified.',
+'Company Cheat Sheet':'Act as a chief of staff briefing a founder. From the Job Description and CV below, produce a one-page Company Cheat Sheet: business model, stage, leadership, news to verify, likely interview themes, and ten sharp questions. Use Markdown headings and bullets.'};
+function ld(k,f){try{return JSON.parse(localStorage.getItem(k))||f}catch(e){return f}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var tpl=ld(T,D),S=ld(K,{});
+function note(t){$('msg').textContent=t;setTimeout(function(){$('msg').textContent=''},2500)}
+function opts(s,keep){s.innerHTML='';Object.keys(tpl).forEach(function(n){var o=document.createElement('option');o.value=o.textContent=n;s.appendChild(o)});if(keep&&tpl[keep])s.value=keep}
+function showT(){var n=$('tsel').value;$('tname').value=n;$('tbody').value=tpl[n]||''}
+function refresh(n){opts($('fmt'),n||S.fmt);opts($('tsel'),n||$('tsel').value);showT()}
+function save(){S={cv:$('cv').value,jd:$('jd').value,fmt:$('fmt').value,ai:$('ai').value};sv(K,S)}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')}
+function md(t){var o=[],ul=0;function cl(){if(ul){o.push('</ul>');ul=0}}
+t.split(/\r?\n/).forEach(function(l){var m;
+if(m=l.match(/^(#{1,3})\s+(.*)/)){cl();o.push('<h'+m[1].length+'>'+inl(m[2])+'</h'+m[1].length+'>')}
+else if(m=l.match(/^\s*[-*\u2022]\s+(.*)/)){if(!ul){o.push('<ul>');ul=1}o.push('<li>'+inl(m[1])+'</li>')}
+else if(/^\s*$/.test(l)){cl()}else{cl();o.push('<p>'+inl(l)+'</p>')}});cl();return o.join('')}
+function pv(){$('pv').innerHTML=md($('ai').value)||'<p class="ph">Your formatted brief appears here.</p>'}
+$('gen').onclick=function(){save();$('out').value=(tpl[$('fmt').value]||'')+'\n\n=== CANDIDATE CV / LINKEDIN PROFILE ===\n'+($('cv').value.trim()||'[not provided]')+'\n\n=== JOB DESCRIPTION / CLIENT NEEDS ===\n'+($('jd').value.trim()||'[not provided]')+'\n\n=== END OF INPUT ===';note('Master prompt ready.')};
+$('cp').onclick=function(){var t=$('out').value;if(!t)return note('Generate a prompt first.');
+function fb(){$('out').select();try{document.execCommand('copy');note('Copied.')}catch(e){note('Press Ctrl+C to copy.')}}
+if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){note('Copied.')},fb);else fb()};
+$('tsel').onchange=showT;
+$('tsave').onclick=function(){var n=$('tname').value.trim();if(!n||!$('tbody').value.trim())return note('Add a name and instructions.');tpl[n]=$('tbody').value;sv(T,tpl);S.fmt=n;refresh(n);save();note('Template saved.')};
+$('tnew').onclick=function(){$('tname').value='';$('tbody').value='';$('tname').focus()};
+$('tdel').onclick=function(){var n=$('tsel').value;if(Object.keys(tpl).length<2)return note('Keep at least one template.');delete tpl[n];sv(T,tpl);S.fmt='';refresh();note('Template deleted.')};
+document.querySelectorAll('nav button').forEach(function(b){b.onclick=function(){document.querySelectorAll('nav button,.tab').forEach(function(e){e.classList.remove('on')});b.classList.add('on');$(b.dataset.t).classList.add('on')}});
+$('pdf').onclick=function(){pv();window.print()};
+$('th').onclick=function(){var c=H.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');H.dataset.theme=c==='dark'?'light':'dark';sv('sf_theme',H.dataset.theme)};
+var th=ld('sf_theme',null);if(th)H.dataset.theme=th;
+['cv','jd','fmt','ai'].forEach(function(i){$(i).oninput=$(i).onchange=function(){save();if(i==='ai')pv()}});
+refresh();['cv','jd','ai'].forEach(function(i){$(i).value=S[i]||''});pv();
+})();
+`;
+F['js/sw-register.js']=r`if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(e){console.warn('SW failed',e)})})}
+`;
+F['sw.js']=r`var V='specforge-v1',A=['./','index.html','offline.html','css/style.css','css/print.css','js/app.js','js/sw-register.js','manifest.webmanifest','icons/icon-192x192.png','icons/icon-512x512.png'];
+self.addEventListener('install',function(e){e.waitUntil(caches.open(V).then(function(c){return c.addAll(A)}).then(function(){return self.skipWaiting()}))});
+self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==V}).map(function(x){return caches.delete(x)}))}).then(function(){return self.clients.claim()}))});
+self.addEventListener('fetch',function(e){var q=e.request;if(q.method!=='GET'||!q.url.startsWith(self.location.origin))return;
+e.respondWith(caches.open(V).then(function(c){return c.match(q).then(function(m){
+var f=fetch(q).then(function(r){if(r.ok)c.put(q,r.clone());return r}).catch(function(){return m||(q.mode==='navigate'?c.match('offline.html'):Response.error())});
+return m||f})}))});
+`;
+F['css/style.css']=r`:root{box-sizing:border-box;--bg:#f4f3ef;--fg:#1d1d21;--mut:#6b6a66;--pn:#fff;--ln:#d9d6cc;--au:#9a7424;--ch:#1d1d21;--gd:#f1d98f}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#16161a;--fg:#ece8dc;--mut:#9a978c;--pn:#202025;--ln:#33333a;--au:#d4af5a;--ch:#d4af5a;--gd:#1a1a1e}}
+:root[data-theme=dark]{--bg:#16161a;--fg:#ece8dc;--mut:#9a978c;--pn:#202025;--ln:#33333a;--au:#d4af5a;--ch:#d4af5a;--gd:#1a1a1e}
+*{box-sizing:inherit}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:#1d1d21;color:#f1d98f}
+header h1{margin:0;font:1.4rem Georgia,serif}header small{color:#b9b5a8}
+nav{display:flex;gap:4px;padding:10px 20px 0;border-bottom:1px solid var(--ln)}
+nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--mut);padding:10px 14px;font:inherit;cursor:pointer}
+nav button.on{color:var(--fg);border-color:var(--au)}
+main{padding:20px;max-width:1200px;margin:0 auto}.tab{display:none}.tab.on{display:block}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:700px){.g{grid-template-columns:1fr}}
+label{display:block;margin:12px 0;font-weight:600}textarea,input,select{display:block;width:100%;margin-top:6px;padding:10px;background:var(--pn);color:var(--fg);border:1px solid var(--ln);border-radius:6px;font:.95rem/1.5 system-ui,sans-serif}
+textarea{min-height:220px;resize:vertical}#out{min-height:260px}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--ln);background:var(--pn);color:var(--fg);padding:9px 14px}
+button.pri{background:var(--ch);color:var(--gd);border-color:var(--ch);font-weight:600}
+button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--au);outline-offset:2px}
+details{margin-top:24px;border-top:1px solid var(--ln);padding-top:12px}.tp textarea{min-height:140px}
+#t2.on{display:grid;grid-template-columns:minmax(260px,1fr) minmax(0,210mm);gap:24px;align-items:start}@media(max-width:1000px){#t2.on{display:block}}
+.hint{color:var(--mut);font-size:.85rem}#msg{color:var(--au)}
+.a4{background:#fff;color:#1a1a1a;width:100%;max-width:210mm;min-height:297mm;padding:20mm;font:11pt/1.6 Georgia,Merriweather,serif;box-shadow:0 2px 14px rgba(0,0,0,.25);overflow-wrap:anywhere}
+.a4 h1{font-size:22pt;margin:0 0 8pt;border-bottom:2px solid #b8893a;padding-bottom:6pt}.a4 h2{font-size:15pt;margin:16pt 0 4pt;color:#3a3326}.a4 h3{font-size:12pt;margin:12pt 0 3pt}
+.a4 ul{padding-left:18pt}.a4 p{margin:0 0 7pt}.ph{color:#888}
+.doc{max-width:640px;margin:0 auto;padding:40px 20px;font-family:Georgia,serif}
+`;
+F['css/print.css']=r`@page{size:A4;margin:0}
+@media print{html,body{background:#fff!important}header,nav,#t1,.ed,#th{display:none!important}
+main{padding:0;max-width:none}#t2{display:block!important}
+.a4{box-shadow:none;margin:0;width:210mm;max-width:none;min-height:auto;padding:18mm 20mm}
+.a4 h1,.a4 h2,.a4 h3{break-after:avoid}.a4 li,.a4 p{break-inside:avoid}.ph{display:none}
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+`;
+F['404.html']=pg('Page not found','<p>That page does not exist in this app.</p>');
+F['offline.html']=pg('You are offline','<p>This page is not cached yet. SpecForge Wrapper works fully offline once loaded; reconnect and reload once.</p>');
+F['privacy.html']=pg('Privacy','<p>SpecForge Wrapper is local-first. Text you paste stays in your browser. It is saved to localStorage on your device so you do not lose work, and it is never sent to any server. There are no analytics, trackers, cookies or external API calls. Clear your browser site data to erase everything.</p>');
+F['terms.html']=pg('Terms of use','<p>SpecForge Wrapper is provided as is under the MIT License, without warranty. You are responsible for reviewing all AI-generated output before sending it to clients, and for handling candidate personal data in line with the laws that apply to you.</p>');
+F['manifest.webmanifest']=JSON.stringify({name:'SpecForge Wrapper',short_name:'SpecForge',description:'Local prompt engine and executive brief generator',start_url:'./index.html',scope:'./',id:'./',display:'standalone',orientation:'any',background_color:'#1d1d21',theme_color:'#1d1d21',categories:['business','productivity'],icons:[16,32,48,152,180,192,512].map(function(s){return {src:'icons/icon-'+s+'x'+s+'.png',sizes:s+'x'+s,type:'image/png',purpose:'any'}}).concat([192,512].map(function(s){return {src:'icons/icon-maskable-'+s+'x'+s+'.png',sizes:s+'x'+s,type:'image/png',purpose:'maskable'}})),screenshots:[{src:'icons/screenshot-narrow.png',sizes:'540x960',type:'image/png',form_factor:'narrow'},{src:'icons/screenshot-wide.png',sizes:'1280x720',type:'image/png',form_factor:'wide'}]},null,2)+'\n';
+F['browserconfig.xml']='<?xml version="1.0" encoding="utf-8"?>\n<browserconfig><msapplication><tile><square150x150logo src="icons/mstile-150x150.png"/><TileColor>#1d1d21</TileColor></tile></msapplication></browserconfig>\n';
+F['robots.txt']='User-agent: *\nAllow: /\nSitemap: https://example.github.io/specforge-wrapper/sitemap.xml\n';
+F['sitemap.xml']='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+['','privacy.html','terms.html'].map(function(p){return '<url><loc>https://example.github.io/specforge-wrapper/'+p+'</loc></url>'}).join('\n')+'\n</urlset>\n';
+F['humans.txt']='/* TEAM */\nBuilt with: SpecForge Wrapper contributors\n\n/* SITE */\nStandards: HTML5, CSS3, ES6\nDependencies: none\n';
+F['_headers']='/*\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Referrer-Policy: no-referrer\n  Content-Security-Policy: default-src \'self\'; img-src \'self\' data:; style-src \'self\'; script-src \'self\'\n/sw.js\n  Cache-Control: no-cache\n/icons/*\n  Cache-Control: public, max-age=31536000, immutable\n/css/*\n  Cache-Control: public, max-age=3600\n/js/*\n  Cache-Control: public, max-age=3600\n';
+F['_redirects']='/*  /index.html  200\n';
+F['vercel.json']=JSON.stringify({cleanUrls:true,headers:[{source:'/sw.js',headers:[{key:'Cache-Control',value:'no-cache'}]},{source:'/(.*)',headers:[{key:'X-Content-Type-Options',value:'nosniff'},{key:'Referrer-Policy',value:'no-referrer'}]}]},null,2)+'\n';
+F['netlify.toml']='[build]\n  publish = "."\n\n[[headers]]\n  for = "/sw.js"\n  [headers.values]\n    Cache-Control = "no-cache"\n\n[[redirects]]\n  from = "/*"\n  to = "/index.html"\n  status = 200\n';
+F['package.json']=JSON.stringify({name:'specforge-wrapper',version:'1.0.0',description:'Local prompt engine and executive brief generator (PWA)',license:'MIT',private:true,scripts:{start:'npx serve .'}},null,2)+'\n';
+F['.gitignore']='node_modules/\n.DS_Store\n.vercel/\n.netlify/\n*.log\n.env\n';
+F['.github/workflows/deploy.yml']=r`name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: DOLLAR{{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
+`;
+F['.well-known/assetlinks.json']='[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":"com.example.specforge","sha256_cert_fingerprints":["REPLACE_WITH_YOUR_SHA256_FINGERPRINT"]}}]\n';
+F['.well-known/apple-app-site-association']='{"applinks":{"details":[{"appIDs":["TEAMID.com.example.specforge"],"components":[{"/":"/*"}]}]}}\n';
+F['.well-known/security.txt']='Contact: mailto:security@example.com\nExpires: 2027-12-31T23:59:59.000Z\nPreferred-Languages: en\nCanonical: https://example.github.io/specforge-wrapper/.well-known/security.txt\n';
+F['LICENSE']='MIT License\n\nCopyright (c) 2026 SpecForge Wrapper contributors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n';
+F['CONTRIBUTING.md']='# Contributing\n\nThanks for helping improve SpecForge Wrapper.\n\n1. Fork the repo and create a branch.\n2. Keep it dependency-free: vanilla HTML, CSS and JavaScript only.\n3. Test offline behaviour and print output (A4) before opening a pull request.\n4. Describe what changed and why in the pull request.\n';
+F['CODE_OF_CONDUCT.md']='# Code of Conduct\n\nWe follow the spirit of the Contributor Covenant 2.1.\n\n- Be respectful, constructive and inclusive.\n- No harassment, discrimination or personal attacks.\n- Maintainers may remove content or contributors that break these rules.\n\nReport concerns to security@example.com.\n';
+F['CHANGELOG.md']='# Changelog\n\n## 1.0.0 - 2026-10-09\n\n- Prompt staging with editable templates\n- Markdown brief preview and A4 print-to-PDF\n- Offline service worker, PWA manifest, hosting configs\n';
+F['README.md']='# SpecForge Wrapper\n\nLocal prompt engine and executive brief generator. Zero dependencies, works offline, nothing leaves your browser.\n\n## Use\n\n1. **Prompt staging:** paste a CV and job description, pick a format, click Generate Master Prompt, then copy it into your AI tool.\n2. **Brief & PDF:** paste the AI output, check the A4 preview, click Generate Client PDF.\n3. **Templates:** edit base instructions under Manage templates. They are stored in localStorage.\n\n## Export a PDF\n\nIn the print dialog choose Save as PDF, paper size A4, margins None, and turn off headers and footers.\n\n## Run locally\n\n`npx serve .` (service workers need http://localhost or https).\n\n## Deploy\n\n- GitHub Pages: Settings, Pages, Source: GitHub Actions. The workflow in .github/workflows deploys on push to main.\n- Netlify, Vercel or Cloudflare Pages: point at the repo root. Config files are included.\n\n## Before launch\n\nReplace example.com and example.github.io URLs, and fill in .well-known/assetlinks.json and apple-app-site-association if you wrap the app as TWA or iOS.\n\nMIT licensed.\n';
+F['.github/workflows/deploy.yml']=F['.github/workflows/deploy.yml'].replace('DOLLAR','$');
+function anvil(x,cx,cy,k){x.save();x.translate(cx-50*k,cy-29*k);x.scale(k,k);var g=x.createLinearGradient(0,0,0,58);g.addColorStop(0,'#f3dc92');g.addColorStop(1,'#b8893a');x.fillStyle=g;x.beginPath();[[0,12],[100,12],[100,28],[70,28],[64,44],[84,44],[84,58],[16,58],[16,44],[36,44],[30,28],[22,28]].forEach(function(p,i){i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1])});x.closePath();x.fill();x.restore()}
+function cv(w,h,fn){var c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'));return new Promise(function(ok){c.toBlob(ok,'image/png')})}
+function icon(s,m){return cv(s,s,function(x){x.fillStyle='#1d1d21';if(m)x.fillRect(0,0,s,s);else{x.beginPath();x.roundRect(0,0,s,s,s*.2);x.fill()}anvil(x,s/2,s/2,s*(m?.5:.62)/100);if(s>=48){x.fillStyle='#d4af5a';x.fillRect(s*.3,s*(m?.72:.76),s*.4,Math.max(2,s*.012))}})}
+function shot(w,h){return cv(w,h,function(x){x.fillStyle='#16161a';x.fillRect(0,0,w,h);x.fillStyle='#1d1d21';x.fillRect(0,0,w,h*.1);anvil(x,w/2,h*.38,Math.min(w,h)/160);x.fillStyle='#ece8dc';x.textAlign='center';x.font='bold '+Math.round(h*.06)+'px Georgia,serif';x.fillText('SpecForge Wrapper',w/2,h*.62);x.fillStyle='#d4af5a';x.font=Math.round(h*.03)+'px Georgia,serif';x.fillText('Local prompt engine & executive brief generator',w/2,h*.69)})}
+async function ico(b){var p=new Uint8Array(await b.arrayBuffer()),o=new Uint8Array(22+p.length),d=new DataView(o.buffer);d.setUint16(2,1,true);d.setUint16(4,1,true);o[6]=32;o[7]=32;d.setUint16(10,1,true);d.setUint16(12,32,true);d.setUint32(14,p.length,true);d.setUint32(18,22,true);o.set(p,22);return o}
+var Z,$=function(i){return document.getElementById(i)};
+async function build(){
+var z=new JSZip(),R=z.folder('specforge-wrapper');
+Object.keys(F).forEach(function(k){R.file(k,fix(F[k]))});
+var I=R.folder('icons'),P=[];
+[16,32,48,152,180,192,512].forEach(function(s){P.push(icon(s,false).then(function(b){I.file('icon-'+s+'x'+s+'.png',b);if(s===32)return ico(b).then(function(u){R.file('favicon.ico',u)});if(s===512)$('ic').src=URL.createObjectURL(b)}))});
+[192,512].forEach(function(s){P.push(icon(s,true).then(function(b){I.file('icon-maskable-'+s+'x'+s+'.png',b)}))});
+P.push(icon(150,false).then(function(b){I.file('mstile-150x150.png',b)}));
+P.push(shot(540,960).then(function(b){I.file('screenshot-narrow.png',b)}));
+P.push(shot(1280,720).then(function(b){I.file('screenshot-wide.png',b)}));
+await Promise.all(P);return z}
+build().then(function(z){Z=z;var n=Object.keys(z.files).filter(function(k){return !z.files[k].dir});$('n').textContent=n.length;$('ls').textContent=n.sort().join('\n');$('st').textContent='Ready. Archive contains '+n.length+' files.';$('dl').disabled=false}).catch(function(e){$('st').textContent='Build failed: '+e.message});
+$('dl').onclick=async function(){$('dl').disabled=true;$('st').textContent='Packing…';
+try{var b=await Z.generateAsync({type:'blob',compression:'DEFLATE'}),d=window.claude&&await claude.use('downloads');
+if(!d){$('st').textContent='Downloads are not available in this view. Open the artifact link in claude.ai.';return}
+await d.save({filename:'specforge-wrapper.zip',data:b});$('st').textContent='Saved specforge-wrapper.zip.'}
+catch(e){$('st').textContent=e&&e.code==='declined'?'Download cancelled.':'Could not save: '+((e&&e.message)||e)}
+finally{$('dl').disabled=false}};
+</script></body></html>
