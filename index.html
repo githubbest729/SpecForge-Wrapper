@@ -17,9 +17,10 @@
 <label>Saved sessions<select id="ssel"></select></label>
 <div class="row"><button id="sload" type="button">Load session</button><button id="sdel" type="button">Delete session</button></div>
 </div></details>
-<details><summary>Manage templates</summary><div class="tp"><label>Template<select id="tsel"></select></label><label>Name<input id="tname"></label><label>Base instructions<textarea id="tbody"></textarea></label><div class="row"><button id="tsave" type="button">Save template</button><button id="tnew" type="button">New template</button><button id="tdel" type="button">Delete template</button></div></div></details>
+<details><summary>Manage templates</summary><div class="tp"><label>Template<select id="tsel"></select></label><label>Name<input id="tname"></label><label>Base instructions<textarea id="tbody"></textarea></label><div class="row"><button id="tsave" type="button">Save template</button><button id="tnew" type="button">New template</button><button id="tdel" type="button">Delete template</button><button id="treset" type="button">Reset to Defaults</button></div></div></details>
 </section>
 <section id="t2" class="tab"><div class="ed"><label>Paste AI Output Here<textarea id="ai"></textarea></label>
 <label class="chk"><input type="checkbox" id="conf">Include Confidential Header/Footer</label>
+<label>Header and footer text<input id="ctext" placeholder="Confidential – Executive Search"></label>
 <button id="pdf" class="pri" type="button">Generate Client PDF</button><p class="hint">In the print dialog choose Save as PDF, paper A4, margins None, headers and footers off.</p></div><article id="pv" class="a4"></article></section>
 </main><script src="js/app.js"></script><script src="js/sw-register.js"></script></body></html>
