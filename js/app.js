@@ -14,13 +14,14 @@ var B={
 'Engagement & Reactivation Helper':'Act as a chief of staff supporting a founder. From the material below, write five thoughtful comments (two to three sentences each) to post on industry peers LinkedIn posts, and three short reactivation DMs (under 60 words each) for stale candidate or client threads. Every message must add value, reference something specific, and avoid generic check-in phrasing.',
 'Quick BD Research Pack':'Act as a business development researcher. From the Job Description below, produce a one-page Quick BD Research Pack: a company overview (what they do, stage, market), five approach angles tied to their hiring need, and three conversation openers. Mark anything unverified.',
 'Target List Builder':'Act as a sourcing specialist. From the Job Description below, extract the core requirements (must-haves, nice-to-haves, seniority signals), then build a boolean search string for LinkedIn Recruiter with grouped titles, skills and exclusions, plus a list of 15 competitor or adjacent companies to source from, each with a one-line reason. Flag companies to verify.',
-'SOP & Process Documenter':'Act as an operations lead. Turn the raw notes below into a Standard Operating Procedure: purpose, trigger, owner, tools needed, a numbered step-by-step checklist, common mistakes, and a done-when criterion, so the workflow never has to be explained again. List any missing information as questions to confirm.'};
+'SOP & Process Documenter':'Act as an operations lead. Turn the raw notes below into a Standard Operating Procedure: purpose, trigger, owner, tools needed, a numbered step-by-step checklist, common mistakes, and a done-when criterion, so the workflow never has to be explained again. List any missing information as questions to confirm.',
+'Daily Morning Checklist':'Act as an operations lead supporting a Founders Associate. Turn the pasted role responsibilities and current priorities into a sequenced daily checklist: a first-30-minutes routine, time-boxed priority blocks, recurring admin and follow-ups, and an end-of-day wrap-up. Put urgent and founder-dependent items first.'};
 var D={};Object.keys(B).forEach(function(k){D[k]=B[k]+VR});
 function ld(k,f){try{var v=JSON.parse(localStorage.getItem(k));return v||f}catch(e){return f}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 var tpl=ld(T,null),S=ld(K,{}),ss=ld(SS,{});
-if(!tpl)tpl=D;else if(!ld('sf_v3',0)){tpl=Object.assign({},D,tpl);sv(T,tpl)}
-sv('sf_v3',1);
+if(!tpl)tpl=D;else if(!ld('sf_v4',0)){tpl=Object.assign({},D,tpl);sv(T,tpl)}
+sv('sf_v4',1);
 function note(t){$('msg').textContent=t;setTimeout(function(){$('msg').textContent=''},2500)}
 function today(){return new Date().toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})}
 function short(ts){return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'})}
@@ -50,7 +51,7 @@ function pv(){var c=$('conf').checked;$('ctext').disabled=!c;var h=md($('ai').va
 if(!h){$('pv').innerHTML='<p class="ph">Your formatted brief appears here.</p>';return}
 var t=esc($('ctext').value.trim()||CT),d=today();
 $('pv').innerHTML=(c?'<div class="ch">'+t+' \u2013 '+d+'</div>':'')+h+(c?'<div class="cf">'+t+'</div>':'')}
-function gen(){save();var f=$('fmt').value,v=$('voice').value.trim(),mk=/linkedin|marketing|engagement|reactivation/i.test(f);$('out').value=(tpl[f]||'')+(mk&&v?'\n\nCRITICAL VOICE RULE: Match the exact tone, sentence length, and formatting of these sample posts:\n'+v:'')+'\n\n=== CANDIDATE CV / LINKEDIN PROFILE ===\n'+($('cv').value.trim()||'[not provided]')+'\n\n=== JOB DESCRIPTION / CLIENT NEEDS ===\n'+($('jd').value.trim()||'[not provided]')+'\n\n=== END OF INPUT ===';note(mk&&!v?'Prompt ready. Tip: add writing samples under Voice Lock.':'Master prompt ready.')}
+function gen(){save();var f=$('fmt').value,v=$('voice').value.trim(),mk=/linkedin|marketing|engagement|reactivation/i.test(f);$('out').value=(tpl[f]||'')+(mk&&v?'\n\nCRITICAL: Write in this exact voice, tone, and formatting style:\n'+v:'')+'\n\n=== CANDIDATE CV / LINKEDIN PROFILE ===\n'+($('cv').value.trim()||'[not provided]')+'\n\n=== JOB DESCRIPTION / CLIENT NEEDS ===\n'+($('jd').value.trim()||'[not provided]')+'\n\n=== END OF INPUT ===';note(mk&&!v?'Prompt ready. Tip: add writing samples under Voice Lock.':'Master prompt ready.')}
 function copy(){var t=$('out').value;
 function fb(){$('out').select();try{document.execCommand('copy');note('Copied.')}catch(e){note('Press Ctrl+C to copy.')}}
 if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){note('Copied.')},fb);else fb()}
@@ -75,13 +76,20 @@ var has=!!tpl[s.fmt];if(has)$('fmt').value=s.fmt;
 s.at=Date.now();sv(SS,ss);sessList(n);$('sname').value=n;ct();gen();
 note(has?'Session loaded.':'Session loaded. Its template no longer exists, so "'+$('fmt').value+'" is selected.');
 $('out').scrollIntoView({behavior:'smooth',block:'center'})};
-function auto(){return $('jd').value.replace(/\s+/g,' ').trim().slice(0,30)}
+function auto(){return $('jd').value.replace(/\s+/g,' ').trim().slice(0,25)}
 $('sname').onfocus=function(){if(!this.value.trim())this.value=auto()};
 $('sdup').onclick=function(){var n=$('sname').value.trim()||auto();$('sname').value=(n||'Untitled')+' (copy)';$('out').value='';note('Duplicated as an unsaved draft. Click Save Session to keep it.')};
 $('sjson').onclick=function(){var n=$('sname').value.trim()||auto()||'session',sl=n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'session';
 dl(JSON.stringify({name:n,format:$('fmt').value,cv:$('cv').value,jd:$('jd').value,exported:new Date().toISOString()},null,2),'application/json',sl+'-'+day()+'.json');note('Session exported.')};
 $('voice').oninput=function(){sv('sf_voice',this.value)};
-$('sdel').onclick=function(){var n=$('ssel').value;if(!ss[n])return note('No saved session.');delete ss[n];sv(SS,ss);sessList();note('Session deleted.')};
+$('sdel').onclick=function(){var n=$('ssel').value;if(!ss[n])return note('No saved session.');if(!confirm('Are you sure you want to delete this session?'))return;delete ss[n];sv(SS,ss);sessList();note('Session deleted.')};
+var DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'],ST=['Draft','Ready','Posted'],PL=ld('sf_plan',{});
+function planBuild(){var w=$('plan');w.innerHTML='';DAYS.forEach(function(d){
+var p=PL[d]||(PL[d]={t:'',s:'Draft'}),r=document.createElement('div');r.className='pr';r.dataset.s=p.s;
+r.innerHTML='<strong class="pd">'+d+'</strong><input aria-label="'+d+' topic or angle" placeholder="Topic / Angle"><select aria-label="'+d+' status">'+ST.map(function(x){return '<option>'+x+'</option>'}).join('')+'</select><button type="button" aria-label="Clear '+d+'">Clear</button>';
+var i=r.querySelector('input'),s=r.querySelector('select'),b=r.querySelector('button');i.value=p.t;s.value=p.s;
+function up(){p.t=i.value;p.s=s.value;r.dataset.s=p.s;sv('sf_plan',PL)}
+i.oninput=up;s.onchange=up;b.onclick=function(){i.value='';s.value='Draft';up()};w.appendChild(r)})}
 $('tsel').onchange=showT;
 $('tsave').onclick=function(){var n=$('tname').value.trim();if(!n||!$('tbody').value.trim())return note('Add a name and instructions.');tpl[n]=$('tbody').value;sv(T,tpl);S.fmt=n;refresh(n);save();note('Template saved.')};
 $('tnew').onclick=function(){$('tname').value='';$('tbody').value='';$('tname').focus()};
@@ -100,5 +108,5 @@ hd.addEventListener('click',function(e){if(e.target===hd)hclose()});
 $('th').onclick=function(){var c=H.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');H.dataset.theme=c==='dark'?'light':'dark';sv('sf_theme',H.dataset.theme)};
 var th=ld('sf_theme',null);if(th)H.dataset.theme=th;
 ['cv','jd','fmt','ai'].forEach(function(i){$(i).oninput=$(i).onchange=function(){save();if(i==='ai')pv();if(i==='cv'||i==='jd')ct()}});
-$('voice').value=ld('sf_voice','');refresh();sessList();['cv','jd','ai'].forEach(function(i){$(i).value=S[i]||''});$('conf').checked=!!S.conf;$('ctext').value=S.ctext||CT;ct();pv();
+planBuild();$('voice').value=ld('sf_voice','');refresh();sessList();['cv','jd','ai'].forEach(function(i){$(i).value=S[i]||''});$('conf').checked=!!S.conf;$('ctext').value=S.ctext||CT;ct();pv();
 })();
