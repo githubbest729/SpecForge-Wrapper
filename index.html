@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SpecForge Wrapper</title><meta name="description" content="Local prompt engine and executive brief generator"><meta name="theme-color" content="#1d1d21"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="favicon.ico"><link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png"><link rel="apple-touch-icon" href="icons/icon-180x180.png"><meta name="msapplication-config" content="browserconfig.xml"><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/print.css" media="print"></head><body>
+<header><div><h1>SpecForge Wrapper</h1><small>Local prompt engine &amp; executive brief generator</small></div><button id="th" type="button">Theme</button></header>
+<nav><button class="on" data-t="t1" type="button">Prompt staging</button><button data-t="t2" type="button">Brief &amp; PDF</button></nav>
+<main><section id="t1" class="tab on">
+<div class="g"><label>Paste Candidate CV / LinkedIn Profile<textarea id="cv"></textarea></label><label>Paste Job Description or Client Needs<textarea id="jd"></textarea></label></div>
+<label>Select Output Format<select id="fmt"></select></label>
+<button id="gen" class="pri" type="button">Generate Master Prompt</button>
+<label>Master prompt<textarea id="out" readonly></textarea></label>
+<button id="cp" class="pri" type="button">Copy Master Prompt</button> <span id="msg" role="status"></span>
+<details><summary>Manage templates</summary><div class="tp"><label>Template<select id="tsel"></select></label><label>Name<input id="tname"></label><label>Base instructions<textarea id="tbody"></textarea></label><div><button id="tsave" type="button">Save template</button> <button id="tnew" type="button">New template</button> <button id="tdel" type="button">Delete template</button></div></div></details>
+</section>
+<section id="t2" class="tab"><div class="ed"><label>Paste AI Output Here<textarea id="ai"></textarea></label><button id="pdf" class="pri" type="button">Generate Client PDF</button><p class="hint">In the print dialog choose Save as PDF, paper A4, margins None, headers and footers off.</p></div><article id="pv" class="a4"></article></section>
+</main><script src="js/app.js"></script><script src="js/sw-register.js"></script></body></html>

@@ -1,0 +1,6 @@
+@page{size:A4;margin:0}
+@media print{html,body{background:#fff!important}header,nav,#t1,.ed,#th{display:none!important}
+main{padding:0;max-width:none}#t2{display:block!important}
+.a4{box-shadow:none;margin:0;width:210mm;max-width:none;min-height:auto;padding:18mm 20mm}
+.a4 h1,.a4 h2,.a4 h3{break-after:avoid}.a4 li,.a4 p{break-inside:avoid}.ph{display:none}
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}

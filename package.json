@@ -1,0 +1,10 @@
+{
+  "name": "specforge-wrapper",
+  "version": "1.0.0",
+  "description": "Local prompt engine and executive brief generator (PWA)",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
