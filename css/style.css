@@ -15,8 +15,8 @@ textarea{min-height:220px;resize:vertical}#out{min-height:260px}
 .ct{display:block;margin-top:4px;font-weight:400;font-size:.8rem;color:var(--mut)}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
 .row button{display:inline-flex;align-items:center}
-button svg{width:1.1em;height:1.1em;margin-right:7px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
-button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--ln);background:var(--pn);color:var(--fg);padding:9px 14px}
+button svg{width:18px !important;height:18px !important;margin-right:8px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:text-bottom}
+button{display:inline-flex;align-items:center;justify-content:center;font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--ln);background:var(--pn);color:var(--fg);padding:9px 14px}
 button.pri{background:var(--ch);color:var(--gd);border-color:var(--ch);font-weight:600}
 button.pri:hover{filter:brightness(1.15)}
 button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--au);outline-offset:2px}
