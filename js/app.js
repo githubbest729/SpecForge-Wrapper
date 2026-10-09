@@ -71,6 +71,11 @@ document.querySelectorAll('nav button').forEach(function(b){b.onclick=function()
 $('pdf').onclick=function(){pv();window.print()};
 $('conf').onchange=function(){save();pv()};
 $('ctext').oninput=function(){save();pv()};
+var hd=$('hd');
+$('help').onclick=function(){if(hd.showModal)hd.showModal();else hd.setAttribute('open','')};
+function hclose(){if(hd.close)hd.close();else hd.removeAttribute('open')}
+$('hx').onclick=hclose;
+hd.addEventListener('click',function(e){if(e.target===hd)hclose()});
 $('th').onclick=function(){var c=H.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');H.dataset.theme=c==='dark'?'light':'dark';sv('sf_theme',H.dataset.theme)};
 var th=ld('sf_theme',null);if(th)H.dataset.theme=th;
 ['cv','jd','fmt','ai'].forEach(function(i){$(i).oninput=$(i).onchange=function(){save();if(i==='ai')pv();if(i==='cv'||i==='jd')ct()}});
