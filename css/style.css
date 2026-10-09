@@ -40,4 +40,9 @@ dialog h2{margin:0 0 12px;font:1.4rem Georgia,serif}dialog ol{padding-left:20px;
 .a4 .meta-header .wide{grid-column:1/-1}.a4 .meta-header strong{color:#3a3326}
 @media(max-width:600px){.a4 .meta-header{grid-template-columns:1fr}}
 @media screen{.a4{min-height:min(297mm,85vh);max-height:85vh;overflow-y:auto}}
+.ph2{margin:0;font:1.4rem Georgia,serif}
+.pr{display:grid;grid-template-columns:110px 1fr 140px auto;gap:10px;align-items:center;padding:12px 14px;margin-bottom:10px;background:var(--pn);border:1px solid var(--ln);border-left:4px solid var(--ln);border-radius:8px}
+.pr input,.pr select{margin-top:0}.pd{font-family:Georgia,serif}
+.pr[data-s=Ready]{border-left-color:var(--au)}.pr[data-s=Posted]{border-left-color:#3d8b5f}.pr[data-s=Posted] input{text-decoration:line-through;color:var(--mut)}
+@media(max-width:700px){.pr{grid-template-columns:1fr auto auto}.pr input{grid-column:1/-1;grid-row:2}}
 .doc{max-width:640px;margin:0 auto;padding:40px 20px;font-family:Georgia,serif}
