@@ -9,8 +9,8 @@
 </div>
 <label>Select Output Format<select id="fmt"></select></label>
 <div class="row"><button id="gen" class="pri" type="button">Generate Master Prompt</button><button id="clr" type="button">Clear All</button><small class="hint">Ctrl/Cmd + Enter also generates</small></div>
-<label>Master prompt<textarea id="out" readonly></textarea></label>
-<div class="row"><button id="cp" class="pri" type="button">Copy Master Prompt</button><button id="cpc" type="button">Copy &amp; Open Claude</button><button id="cpg" type="button">Copy &amp; Open ChatGPT</button><button id="txt" type="button">Download as .txt</button><span id="msg" role="status"></span></div>
+<label>Master prompt<textarea id="out" readonly placeholder="Click 'Generate Master Prompt' (or press Ctrl/Cmd + Enter) to construct your brief..."></textarea></label>
+<div class="row"><button id="cp" class="pri" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>Copy Master Prompt</button><button id="cpc" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></svg>Copy &amp; Open Claude</button><button id="cpg" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Copy &amp; Open ChatGPT</button><button id="txt" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>Download as .txt</button><span id="msg" role="status"></span></div>
 <details><summary>Saved sessions</summary><div class="tp">
 <label>Session name<input id="sname" placeholder="e.g. Acme CFO search"></label>
 <div class="row"><button id="ssave" type="button">Save Session</button></div>
@@ -19,7 +19,7 @@
 </div></details>
 <details><summary>Manage templates</summary><div class="tp"><label>Template<select id="tsel"></select></label><label>Name<input id="tname"></label><label>Base instructions<textarea id="tbody"></textarea></label><div class="row"><button id="tsave" type="button">Save template</button><button id="tnew" type="button">New template</button><button id="tdel" type="button">Delete template</button><button id="treset" type="button">Reset to Defaults</button></div></div></details>
 </section>
-<section id="t2" class="tab"><div class="ed"><label>Paste AI Output Here<textarea id="ai" placeholder="Paste the AI's response here (Markdown headings and bullets are formatted automatically)..."></textarea></label>
+<section id="t2" class="tab"><div class="ed"><label>1. Source Text (Markdown)<textarea id="ai" placeholder="Paste the AI's response here (Markdown headings and bullets are formatted automatically)..."></textarea></label>
 <label class="chk"><input type="checkbox" id="conf">Include Confidential Header/Footer</label>
 <label>Header and footer text<input id="ctext" placeholder="Confidential – Executive Search"></label>
 <button id="pdf" class="pri" type="button">Generate Client PDF</button><p class="hint">In the print dialog choose Save as PDF, paper A4, margins None, headers and footers off.</p></div><article id="pv" class="a4"></article></section>
